@@ -1,3 +1,19 @@
+// 1. KONFIGURASI FIREBASE REALTIME DATABASE
+const firebaseConfig = {
+    apiKey: "AIzaSy...", // Sesuaikan dengan API Key proyek Firebase kamu jika ada
+    authDomain: "cicai-quiz-db.firebaseapp.com",
+    databaseURL: "https://cicai-quiz-db-default-rtdb.firebaseio.com/", // Link database kamu
+    projectId: "cicai-quiz-db",
+    storageBucket: "cicai-quiz-db.appspot.com",
+    messagingSenderId: "1234567890",
+    appId: "1:123456:web:abcde123"
+};
+
+// Inisialisasi Firebase
+firebase.initializeApp(firebaseConfig);
+const database = firebase.database();
+
+// 2. DAFTAR SOAL KUIS (Sudah diperbaiki pada nomor 9)
 const daftarSoal = [
     { pertanyaan: "1. Look at the sky! It ___ going to rain soon.", pilihan: ["is", "am", "are", "was"], jawabanBenar: 0 },
     { pertanyaan: "2. What is the antonym (lawan kata) of 'Big'?", pilihan: ["Large", "Small", "Tall", "Heavy"], jawabanBenar: 1 },
@@ -7,7 +23,7 @@ const daftarSoal = [
     { pertanyaan: "6. Pineapple in Indonesian means...", pilihan: ["Semangka", "Nanas", "Melon", "Apel"], jawabanBenar: 1 },
     { pertanyaan: "7. How do you say 'Selamat Pagi' in English?", pilihan: ["Good Afternoon", "Good Evening", "Good Night", "Good Morning"], jawabanBenar: 3 },
     { pertanyaan: "8. This is my sister. ___ name is Alicia.", pilihan: ["His", "Her", "Its", "Your"], jawabanBenar: 1 },
-    { navigation: "9. We use our ___ to listen to music.", pilihan: ["Eyes", "Nose", "Ears", "Mouth"], jawabanBenar: 2 },
+    { pertanyaan: "9. We use our ___ to listen to music.", pilihan: ["Eyes", "Nose", "Ears", "Mouth"], jawabanBenar: 2 }, 
     { pertanyaan: "10. Yesterday, My brother ___ a new bicycle.", pilihan: ["buy", "buys", "buying", "bought"], jawabanBenar: 3 }
 ];
 
@@ -77,7 +93,7 @@ function tampilkanSoal() {
     }
 }
 
-// LOGIKA BARU: Sekali klik langsung kunci & muncul button next (tidak usah cari jawaban benar)
+// Sekali klik langsung kunci & muncul button next
 function pilihJawaban(indeksDipilih) {
     let soalAktif = daftarSoal[indeksSekarang];
     
@@ -132,13 +148,24 @@ function tampilkanHalamanHasil() {
     if (skor === 100) {
         elemenVisual.innerText = "🏆"; 
         elemenPesan.innerText = "Luar Biasa! Kamu Juara Cicai Quiz, Benar Semua!";
-    } else if (skor >= 60) { // Lebih dari 5 soal benar (mulai dari 6 soal ke atas)
+    } else if (skor >= 60) {
         elemenVisual.innerText = "🤗"; 
         elemenPesan.innerText = "Hebat banget! Ini pelukan hangat karena kamu berhasil lulus!";
-    } else { // Kurang dari 5 soal benar (5 ke bawah)
+    } else {
         elemenVisual.innerText = "💪"; 
         elemenPesan.innerText = "Jangan berkecil hati! Tetap semangat belajar lagi ya!";
     }
+
+    // LOGIKA KIRIM DATA SKOR KE FIREBASE REALTIME DATABASE
+    database.ref('skor_kuis/' + nickname).set({
+        nama: nickname,
+        skor: skor,
+        waktuSelesai: new Date().toLocaleString()
+    }).then(() => {
+        console.log("Data skor berhasil disimpan ke Firebase!");
+    }).catch((error) => {
+        console.error("Gagal menyimpan data ke Firebase: ", error);
+    });
 }
 
 function ulangiKuis() {
